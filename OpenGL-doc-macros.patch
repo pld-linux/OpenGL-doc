@@ -1,0 +1,87 @@
+--- main/doc/man/macros/mkhead.awk.orig	2008-02-16 23:46:15.790902000 +0100
++++ main/doc/man/macros/mkhead.awk	2008-02-17 00:02:59.748114883 +0100
+@@ -6,6 +6,7 @@
+ # GL (glu, glx) function, then generates M4 definitions for man page
+ #
+ BEGIN {
++  FS = " |\t|\\("
+   found = 0
+   numargs = 0
+   newargs[0] = ""
+@@ -22,12 +23,14 @@ BEGIN {
+   }
+ }
+ 
+-/extern/ {
++/extern|GLAPI/ {
+   cmdfield = 0;
+   # search for the command string
+   for (i = 3; i <= NF; i++)
+   {
+     name = $i;
++    if (substr(name, 1, 1) == "*")
++      name = substr(name, 2);
+     if (index(name,"gl") == 1)
+     {
+       cmdfield = i;
+--- main/doc/man/macros/mkhead.ftn.awk.orig	2000-01-26 11:30:36.000000000 +0100
++++ main/doc/man/macros/mkhead.ftn.awk	2008-02-17 00:02:16.821668644 +0100
+@@ -30,12 +30,14 @@ BEGIN {
+   }
+ }
+ 
+-/extern/ {
++/extern|GLAPI/ {
+   cmdfield = 0;
+   # search for the command string
+   for (i = 3; i <= NF; i++)
+   {
+     name = $i;
++    if (substr(name, 1, 1) == "*")
++      name = substr(name, 2);
+     if (index(name,"gl") == 1)
+     {
+       cmdfield = i;
+@@ -40,7 +40,8 @@ BEGIN {
+     {
+       cmdfield = i;
+       # strip the gl, glu, or glX prefix
+-      if (index(name,"glu") == 1 || index(name,"glX") == 1)
++      # note that the X of glX is not stripped!
++      if (index(name,"glu") == 1)
+ 	name = substr(name,4);
+       else
+ 	name = substr(name,3);
+@@ -78,10 +79,10 @@ BEGIN {
+ 
+ END {
+   if (found == 0) {
+-    if (basename == "glxintro") {
++    if (basename == "xintro") {
+       numNames = 1;
+       numFound[0] = 1;
+-      names[0,0] = "Intro";
++      names[0,0] = "XIntro";
+     }
+     else if (basename == "intro") {
+       numNames = 1;
+@@ -101,7 +102,7 @@ END {
+   printf "_define(_header,@<dnl\n"
+   printf "_setup()dnl\n"
+   printf "_define(_cname,$1)dnl\n"
+-  printf ".TH %s$1 \n", prefix
++  printf ".TH %s$1 3G\n", prefix
+   printf ".SH NAME\n"
+   printf ".B \""
+   for (i=0; i<numNames; i++)
+--- main/doc/man/manglx/standard/GNUmakefile.orig	2000-04-05 08:43:38.000000000 +0200
++++ main/doc/man/manglx/standard/GNUmakefile	2008-02-17 01:24:04.165322221 +0100
+@@ -55,7 +55,7 @@
+ MANPREF = man
+ include $(DEPTH)/mandefs
+ 
+-APIFILE = $(ROOT)/usr/include/GL/glx.h
++APIFILE = "$(ROOT)/usr/include/GL/glx.h $(ROOT)/usr/include/GL/glxext.h"
+ 
+ VERSION     = Version 1.2
+ DATE	    = 6 March 1997
