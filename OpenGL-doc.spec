@@ -65,7 +65,7 @@ funkcje OpenGL 1.2.1, GLU 1.3 (GL Utility Library) oraz GLX 1.3
 
 %prep
 %setup -q -c -a1
-%patch0 -p0
+%patch -P0 -p0
 
 # hack
 install -d usr/include
